@@ -1,8 +1,8 @@
 #!/bin/bash
 
-$USER=$1
-$PASSWORD=$2
-$POOL_ID=$3
+USER=$1
+PASSWORD=$2
+POOL_ID=$3
 
 # Register Host with Cloud Access Subscription
 
