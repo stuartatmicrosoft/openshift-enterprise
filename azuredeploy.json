@@ -141,7 +141,7 @@
 		"masterSubnetName": "mastersubnet",
 		"nodeSubnetName": "[concat(variables('namingInfix'), 'nodesubnet')]",
 		"nodeLoadBalancerName": "[concat(variables('namingInfix'), 'lb')]",
-		"nodePublicIpAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('nodeLbPublicIpAddressName'))]",
+		"nodePublicIpAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('nodeLbPublicIpDnsLabelPrefix'))]",
 		"nodeLbId": "[resourceId('Microsoft.Network/loadBalancers', variables('nodeLoadBalancerName'))]",
 		"lbFrontEndConfigId": "[concat(variables('nodeLbId'), '/frontendIPConfigurations/loadBalancerFrontEnd')]",
 		"lbBackendPoolId": "[concat(variables('nodeLbId'),'/backendAddressPools/loadBalancerBackend')]",
@@ -374,7 +374,7 @@
 			}
 		}, {
 			"type": "Microsoft.Network/publicIPAddresses",
-			"name": "[variables('nodeLbPublicIpAddressName')]",
+			"name": "[parameters('nodeLbPublicIpDnsLabelPrefix')]",
 			"location": "[variables('location')]",
 			"apiVersion": "2015-06-15",
 			"tags": {
@@ -401,7 +401,7 @@
 				"displayName": "OpenShiftNodeLB"
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Network/publicIPAddresses/', variables('nodeLbPublicIpAddressName'))]"
+				"[concat('Microsoft.Network/publicIPAddresses/', parameters('nodeLbPublicIpDnsLabelPrefix'))]"
 			],
 			"properties": {
 				"frontendIPConfigurations": [{
@@ -477,7 +477,7 @@
 				"displayName": "OpenShiftMasterPublicIP"
 			},
 			"properties": {
-				"publicIPAllocationMethod": "Dynamic",
+				"publicIPAllocationMethod": "Static",
 				"dnsSettings": {
 					"domainNameLabel": "[parameters('openshiftMasterPublicIpDnsLabelPrefix')]"
 				}

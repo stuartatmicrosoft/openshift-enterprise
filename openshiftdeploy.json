@@ -66,15 +66,6 @@
 		}
 	},
 	"variables": {
-		"vhdContainerName": "vhd",
-		"sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-		"osType": {
-			"publisher": "RedHat",
-			"offer": "RHEL",
-			"sku": "7.2",
-			"version": "latest"
-		},
-		"imageReference": "[variables('osType')]",
 		"openshiftDeploymentScriptUrl": "https://raw.githubusercontent.com/haroldwongms/openshift-enterprise/master/deployOpenShift.sh",
 		"openshiftDeploymentScriptFileName": "deployOpenShift.sh"
 	},
