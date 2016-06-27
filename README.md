@@ -62,4 +62,4 @@ Be sure to follow the OpenShift instructions to create the ncessary DNS entry fo
 
 ### Additional OpenShift Configuration Options
  
-You can configure additional settings per the official [OpenShift Origin Documentation](https://docs.openshift.org/latest/welcome/index.html).
+You can configure additional settings per the official [OpenShift Enterprise Documentation](https://docs.openshift.com/enterprise/3.2/welcome/index.html).
