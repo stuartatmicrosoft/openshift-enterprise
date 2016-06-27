@@ -51,10 +51,10 @@
 				"description": "Administrator password for OpenShift Console"
 			}
 		},
-		"sshPublicKey": {
-			"type": "securestring",
+		"defaultSubDomain": {
+			"type": "string",
 			"metadata": {
-				"description": "SSH public key on all VMs"
+				"description": "Default Subdomain for application routing"
 			}
 		},
 		"sshPrivateKey": {
@@ -88,7 +88,7 @@
 				]
 			},
 			"protectedSettings": {
-				"commandToExecute": "[concat('sh ', variables('openshiftDeploymentScriptFileName'), ' \"', parameters('adminUsername'), '\" \"', parameters('adminPassword'), '\" \"', parameters('sshPublicKey'), '\" \"', parameters('sshPrivateKey'), '\" \"', parameters('openshiftMasterHostname'), '\" \"', parameters('openshiftMasterPublicIpFqdn'), '\" \"', parameters('openshiftMasterPublicIpAddress'), '\" \"', parameters('nodePrefix'), '\" \"', parameters('nodeInstanceCount'), '\"')]"
+				"commandToExecute": "[concat('sh ', variables('openshiftDeploymentScriptFileName'), ' \"', parameters('adminUsername'), '\" \"', parameters('sshPublicKey'), '\" \"', parameters('sshPrivateKey'), '\" \"', parameters('openshiftMasterHostname'), '\" \"', parameters('openshiftMasterPublicIpFqdn'), '\" \"', parameters('openshiftMasterPublicIpAddress'), '\" \"', parameters('nodePrefix'), '\" \"', parameters('nodeInstanceCount'), '\" \"', parameters('defaultSubDomain'), '\"')]"
 			}
 		}
 	}],

@@ -96,21 +96,21 @@
 			"type": "string",
 			"minLength": 1,
 			"metadata": {
-				"description": "Administrator username on all VMs"
+				"description": "Cloud Access Username"
 			}
 		},
 		"cloudAccessPassword": {
 			"type": "securestring",
 			"minLength": 1,
 			"metadata": {
-				"description": "Administrator password for OpenShift Console"
+				"description": "Cloud Access password"
 			}
 		},
 		"cloudAccessPoolId": {
 			"type": "string",
 			"minLength": 1,
 			"metadata": {
-				"description": "Administrator username on all VMs"
+				"description": "Pool ID with RHEL and OpenShift entitlements"
 			}
 		},
 		"sshPublicKey": {
@@ -124,6 +124,13 @@
 			"minLength": 1,
 			"metadata": {
 				"description": "SSH private key for deploying OpenShift"
+			}
+		},
+		"defaultSubDomain": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Default Subdomain for application routing (Wildcard DNS)"
 			}
 		}
 	},
@@ -771,8 +778,8 @@
 					"adminPassword": {
 						"value": "[parameters('adminPassword')]"
 					},
-					"sshPublicKey": {
-						"value": "[parameters('sshPublicKey')]"
+					"defaultSubDomain": {
+						"value": "[parameters('defaultSubDomain')]"
 					},
 					"sshPrivateKey": {
 						"value": "[parameters('sshPrivateKey')]"

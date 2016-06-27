@@ -4,21 +4,20 @@ set -e
 
 SUDOUSER=$1
 PASSWORD=$2
-PUBLICKEY=$3
-PRIVATEKEY=$4
-MASTER=$5
-MASTERPUBLICIPHOSTNAME=$6
-MASTERPUBLICIPADDRESS=$7
-NODEPREFIX=$8
-NODECOUNT=$9
+PRIVATEKEY=$3
+MASTER=$4
+MASTERPUBLICIPHOSTNAME=$5
+MASTERPUBLICIPADDRESS=$6
+NODEPREFIX=$7
+NODECOUNT=$8
+ROUTING=$9
 
 DOMAIN=$( awk 'NR==2' /etc/resolv.conf | awk '{ print $2 }' )
 
-# Generate public / private keys for use by Ansible
+# Generate private keys for use by Ansible
 
 echo "Generating keys"
 
-# runuser -l $SUDOUSER -c "echo \"$PUBLICKEY\" > ~/.ssh/id_rsa.pub"
 runuser -l $SUDOUSER -c "echo \"$PRIVATEKEY\" > ~/.ssh/id_rsa"
 runuser -l $SUDOUSER -c "chmod 600 ~/.ssh/id_rsa*"
 
@@ -46,6 +45,7 @@ deployment_type=openshift-enterprise
 docker_udev_workaround=True
 # containerized=true
 openshift_use_dnsmasq=no
+osm_default_subdomain=$ROUTING
 
 openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
 openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
@@ -67,15 +67,12 @@ do
   echo "$NODEPREFIX-$c.$DOMAIN" >> /etc/ansible/hosts
 done
 
+# Adding user to OpenShift authentication file
+
 mkdir -p /etc/origin/master
-htpasswd -cb /etc/origin/master/htpasswd ${SUDOUSER} ${PASSWORD}
+htpasswd -cb /etc/origin/master/htpasswd $SUDOUSER $PASSWORD
 
-# Reverting to April 22, 2016 commit
-
-# echo "Cloning openshift-ansible repository and reseting to April 22, 2016 commit"
-
-# runuser -l $SUDOUSER -c "git clone https://github.com/openshift/openshift-ansible /home/$SUDOUSER/openshift-ansible"
-# runuser -l $SUDOUSER -c "git --git-dir="/home/$SUDOUSER/openshift-ansible/.git" --work-tree="/home/$SUDOUSER/openshift-ansible/" reset --hard 04b5245"
+# Initiating installation of OpenShift Enterprise using Ansible Playbook
 
 echo "Executing Ansible playbook"
 
@@ -89,6 +86,8 @@ sed -i -e '/Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSE
 echo "Deploying Registry"
 
 runuser -l $SUDOUSER -c "sudo oadm registry --config=/etc/origin/master/admin.kubeconfig --credentials=/etc/origin/master/openshift-registry.kubeconfig"
+
+# Deploying Router
 
 echo "Deploying Router"
 
