@@ -88,7 +88,7 @@
 				]
 			},
 			"protectedSettings": {
-				"commandToExecute": "[concat('sh ', variables('openshiftDeploymentScriptFileName'), ' \"', parameters('adminUsername'), '\" \"', parameters('sshPublicKey'), '\" \"', parameters('sshPrivateKey'), '\" \"', parameters('openshiftMasterHostname'), '\" \"', parameters('openshiftMasterPublicIpFqdn'), '\" \"', parameters('openshiftMasterPublicIpAddress'), '\" \"', parameters('nodePrefix'), '\" \"', parameters('nodeInstanceCount'), '\" \"', parameters('defaultSubDomain'), '\"')]"
+				"commandToExecute": "[concat('sh ', variables('openshiftDeploymentScriptFileName'), ' \"', parameters('adminUsername'), '\" \"', parameters('adminPassword'), '\" \"', parameters('sshPrivateKey'), '\" \"', parameters('openshiftMasterHostname'), '\" \"', parameters('openshiftMasterPublicIpFqdn'), '\" \"', parameters('openshiftMasterPublicIpAddress'), '\" \"', parameters('nodePrefix'), '\" \"', parameters('nodeInstanceCount'), '\" \"', parameters('defaultSubDomain'), '\"')]"
 			}
 		}
 	}],
