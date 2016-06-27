@@ -32,8 +32,10 @@ echo "Configuring SSH ControlPath to use shorter path name"
 
 echo "Generating Installer File"
 
-echo "ansible_config: /usr/share/atomic-openshift-utils/ansible.cfg" >> $SUDOUSER/home/.config/openshift/installer.cfg.yml
-cat > $SUDOUSER/home/.config/openshift/installer.cfg.yml<<EOF
+mkdir /etc/opt/openshift
+
+echo "ansible_config: /usr/share/atomic-openshift-utils/ansible.cfg" >> /etc/opt/openshift/installer.cfg.yml
+cat > /etc/opt/openshift/installer.cfg.yml <<EOF
 ansible_log_path: /tmp/ansible.log
 ansible_ssh_user: $SUDOUSER
 hosts:
@@ -48,14 +50,15 @@ EOF
 
 for (( c=0; c<$NODECOUNT; c++ ))
 do
-  echo "- connect_to: $NODEPREFIX-$c" >> $SUDOUSER/home/.config/openshift/installer.cfg.yml
-  echo "hostname: $NODEPREFIX-$c.$DOMAIN" >> $SUDOUSER/home/.config/openshift/installer.cfg.yml
-  echo "node: true" >> $SUDOUSER/home/.config/openshift/installer.cfg.yml
+  echo "- connect_to: $NODEPREFIX-$c" >> /etc/opt/openshift/installer.cfg.yml
+  echo "hostname: $NODEPREFIX-$c.$DOMAIN" >> /etc/opt/openshift/installer.cfg.yml
+  echo "node: true" >> /etc/opt/openshift/installer.cfg.yml
 done
 
-echo "variant: openshift-enterprise" >> $SUDOUSER/home/.config/openshift/installer.cfg.yml
-echo "variant_version: '3.2'" >> $SUDOUSER/home/.config/openshift/installer.cfg.yml
-echo "version: v1" >> $SUDOUSER/home/.config/openshift/installer.cfg.yml
+echo "variant: openshift-enterprise" >> /etc/opt/openshift/installer.cfg.yml
+echo "variant_version: '3.2'" >> /etc/opt/openshift/installer.cfg.yml
+echo "version: v1" >> /etc/opt/openshift/installer.cfg.yml
+chmod 777 /etc/opt/openshift/installer.cfg.yml
 
 mkdir -p /etc/origin/master
 htpasswd -cb /etc/origin/master/htpasswd ${SUDOUSER} ${PASSWORD}
@@ -64,7 +67,7 @@ htpasswd -cb /etc/origin/master/htpasswd ${SUDOUSER} ${PASSWORD}
 
 echo "Executing OpenShift Atomic Installer"
 
-runuser -l $SUDOUSER -c "atomic-openshift-installer -u install"
+runuser -l $SUDOUSER -c "atomic-openshift-installer -u -c /etc/opt/openshift/installer.cfg.yml install"
 
 echo "Modifying sudoers"
 
