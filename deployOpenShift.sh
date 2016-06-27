@@ -24,50 +24,62 @@ runuser -l $SUDOUSER -c "chmod 600 ~/.ssh/id_rsa*"
 
 echo "Configuring SSH ControlPath to use shorter path name"
 
-# sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
-# sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
-# sed -i -e "s/^#pty=False/pty=False/" /etc/ansible/ansible.cfg
+sed -i -e "s/^# control_path = %(directory)s\/%%h-%%r/control_path = %(directory)s\/%%h-%%r/" /etc/ansible/ansible.cfg
+sed -i -e "s/^#host_key_checking = False/host_key_checking = False/" /etc/ansible/ansible.cfg
+sed -i -e "s/^#pty=False/pty=False/" /etc/ansible/ansible.cfg
 
-# Generating Installer File
+# Create Ansible Hosts File
 
-echo "Generating Installer File"
+echo "Generating Ansible hosts file"
 
-mkdir /etc/opt/openshift
+cat > /etc/ansible/hosts <<EOF
+# Create an OSEv3 group that contains the masters and nodes groups
+[OSEv3:children]
+masters
+nodes
 
-echo "ansible_config: /usr/share/atomic-openshift-utils/ansible.cfg" >> /etc/opt/openshift/installer.cfg.yml
-cat > /etc/opt/openshift/installer.cfg.yml <<EOF
-ansible_log_path: /tmp/ansible.log
-ansible_ssh_user: $SUDOUSER
-hosts:
-- connect_to: $MASTER
-  hostname: $MASTER.$DOMAIN
-  master: true
-  node: true
-  public_hostname: $MASTERPUBLICIPHOSTNAME
-  public_ip: $MASTERPUBLICIPADDRESS
-  storage: true
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+ansible_ssh_user=$SUDOUSER
+ansible_sudo=true
+deployment_type=openshift-enterprise
+docker_udev_workaround=True
+# containerized=true
+openshift_use_dnsmasq=no
+
+openshift_master_cluster_public_hostname=$MASTERPUBLICIPHOSTNAME
+openshift_master_cluster_public_vip=$MASTERPUBLICIPADDRESS
+
+# Enable HTPasswdPasswordIdentityProvider
+openshift_master_identity_providers=[{'name': 'htpasswd_auth', 'login': 'true', 'challenge': 'true', 'kind': 'HTPasswdPasswordIdentityProvider', 'filename': '/etc/origin/master/htpasswd'}]
+
+# host group for masters
+[masters]
+$MASTER.$DOMAIN
+
+# host group for nodes
+[nodes]
+$MASTER.$DOMAIN
 EOF
 
 for (( c=0; c<$NODECOUNT; c++ ))
 do
-  echo "- connect_to: $NODEPREFIX-$c" >> /etc/opt/openshift/installer.cfg.yml
-  echo "hostname: $NODEPREFIX-$c.$DOMAIN" >> /etc/opt/openshift/installer.cfg.yml
-  echo "node: true" >> /etc/opt/openshift/installer.cfg.yml
+  echo "$NODEPREFIX-$c.$DOMAIN" >> /etc/ansible/hosts
 done
-
-echo "variant: openshift-enterprise" >> /etc/opt/openshift/installer.cfg.yml
-echo "variant_version: '3.2'" >> /etc/opt/openshift/installer.cfg.yml
-echo "version: v1" >> /etc/opt/openshift/installer.cfg.yml
-chmod 777 /etc/opt/openshift/installer.cfg.yml
 
 mkdir -p /etc/origin/master
 htpasswd -cb /etc/origin/master/htpasswd ${SUDOUSER} ${PASSWORD}
 
-# Executing OpenShift Atomic Installer
+# Reverting to April 22, 2016 commit
 
-echo "Executing OpenShift Atomic Installer"
+# echo "Cloning openshift-ansible repository and reseting to April 22, 2016 commit"
 
-runuser -l $SUDOUSER -c "atomic-openshift-installer -u -c /etc/opt/openshift/installer.cfg.yml install"
+# runuser -l $SUDOUSER -c "git clone https://github.com/openshift/openshift-ansible /home/$SUDOUSER/openshift-ansible"
+# runuser -l $SUDOUSER -c "git --git-dir="/home/$SUDOUSER/openshift-ansible/.git" --work-tree="/home/$SUDOUSER/openshift-ansible/" reset --hard 04b5245"
+
+echo "Executing Ansible playbook"
+
+runuser -l $SUDOUSER -c "ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml"
 
 echo "Modifying sudoers"
 
