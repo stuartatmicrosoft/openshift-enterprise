@@ -466,6 +466,30 @@
 					}
 				}]
 			}
+		}, {
+			"apiVersion": "2015-06-15",
+			"type": "Microsoft.Network/loadBalancers/inboundNatRules",
+			"name": "[concat(variables('nodeLoadBalancerName'), '/', 'SSH-', variables('namingInfix'), '-', copyIndex())]",
+			"location": "[variables('location')]",
+			"tags": {
+				"displayName": "inboundNatRules"
+			},
+			"copy": {
+				"name": "nodeLbLoop",
+				"count": "[parameters('nodeInstanceCount')]"
+			},
+			"dependsOn": [
+				"[variables('nodeLoadBalancerName')]"
+			],
+			"properties": {
+				"frontendIPConfiguration": {
+					"id": "[variables('lbFrontEndConfigId')]"
+				},
+				"protocol": "tcp",
+				"frontendPort": "[copyIndex(2200)]",
+				"backendPort": 22,
+				"enableFloatingIP": false
+			}
 		},
 
 		{
@@ -596,7 +620,8 @@
 				"displayName": "OpenShiftNodeNetworkInterfaces"
 			},
 			"dependsOn": [
-				"[concat('Microsoft.Network/loadBalancers/', variables('nodeLoadBalancerName'))]"
+				"[concat('Microsoft.Network/loadBalancers/', variables('nodeLoadBalancerName'))]",
+				"[concat('Microsoft.Network/loadBalancers/', variables('nodeLoadBalancerName'), '/inboundNatRules/SSH-', variables('namingInfix'), '-', copyIndex())]"
 			],
 			"copy": {
 				"name": "nodeNICLoop",
@@ -612,6 +637,9 @@
 						},
 						"loadBalancerBackendAddressPools": [{
 							"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('nodeLoadBalancerName'), '/backendAddressPools/loadBalancerBackEnd')]"
+						}],
+						"loadBalancerInboundNatRules": [{
+							"id": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/loadBalancers/', variables('nodeLoadBalancerName'), '/inboundNatRules/SSH-', variables('namingInfix'), '-', copyIndex())]"
 						}]
 					}
 				}]
