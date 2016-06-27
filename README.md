@@ -49,6 +49,7 @@ You will need to create a Key Vault to store your SSH Private Key that will then
 14. sshPrivateKey - id: Should adhere to: "/subscriptions/[subscirption GUID]/resourceGroups/[ResourceGroupName]/providers/Microsoft.KeyVault/vaults/[KeyVaultName]"<br/>
     a. Example: "/subscriptions/111a111b-1234-1abc-aa1a-11df2345ab67/resourceGroups/MyResourceGroup/providers/Microsoft.KeyVault/vaults/MyKeyVault"
 15. sshPrivateKey - SecretName: The Secret Name you used when creating the Secret
+16. defaultSubDomain: The default subdomain to be used for routing to applications (e.g. apps.mydomain.com)
 
 ## Deploy Template
 
