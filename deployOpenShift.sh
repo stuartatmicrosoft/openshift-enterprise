@@ -32,9 +32,8 @@ echo "Configuring SSH ControlPath to use shorter path name"
 
 echo "Generating Installer File"
 
+echo "ansible_config: /usr/share/atomic-openshift-utils/ansible.cfg" >> $SUDOUSER/home/.config/openshift/installer.cfg.yml
 cat > $SUDOUSER/home/.config/openshift/installer.cfg.yml<<EOF
-
-ansible_config: /usr/share/atomic-openshift-utils/ansible.cfg
 ansible_log_path: /tmp/ansible.log
 ansible_ssh_user: $SUDOUSER
 hosts:
