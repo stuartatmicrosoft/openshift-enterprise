@@ -188,9 +188,9 @@
 		"sshPrivateKey": {
 			"reference": {
 				"keyvault": {
-					"id": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', variables('keyVaultName'))]"
+					"id": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
 				},
-				"secretName": "[variables('keyVaultSecret')]"
+				"secretName": "[parameters('keyVaultSecret')]"
 			}
 		},
 		"imageReference": "[variables('osType')]",
