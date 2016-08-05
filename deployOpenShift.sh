@@ -96,3 +96,5 @@ runuser -l $SUDOUSER -c "sudo oadm router osrouter --replicas=$NODECOUNT --crede
 echo "Re-enabling requiretty"
 
 sed -i -e "s/# Defaults    requiretty/Defaults    requiretty/" /etc/sudoers
+
+htpasswd -cb /etc/origin/master/htpasswd $SUDOUSER $PASSWORD
