@@ -815,7 +815,12 @@
 						"value": "[parameters('defaultSubDomain')]"
 					},
 					"sshPrivateKey": {
-						"value": "[variables('sshPrivateKey')]"
+						"reference": {
+							"keyvault": {
+								"id": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', parameters('keyVaultName'))]"
+							},
+							"secretName": "[parameters('keyVaultSecret')]"
+						}
 					}
 				}
 			}
