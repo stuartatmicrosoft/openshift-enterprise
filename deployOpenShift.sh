@@ -67,10 +67,6 @@ do
   echo "$NODEPREFIX-$c.$DOMAIN" >> /etc/ansible/hosts
 done
 
-# Adding user to OpenShift authentication file
-
-mkdir -p /etc/origin/master
-htpasswd -cb /etc/origin/master/htpasswd $SUDOUSER $PASSWORD
 
 # Initiating installation of OpenShift Enterprise using Ansible Playbook
 
@@ -85,7 +81,9 @@ sed -i -e '/Defaults    env_keep += "LC_TIME LC_ALL LANGUAGE LINGUAS _XKB_CHARSE
 
 echo "Deploying Registry"
 
-runuser -l $SUDOUSER -c "sudo oadm registry --config=/etc/origin/master/admin.kubeconfig --credentials=/etc/origin/master/openshift-registry.kubeconfig"
+# runuser -l $SUDOUSER -c "sudo oadm registry --config=/etc/origin/master/admin.kubeconfig --credentials=/etc/origin/master/openshift-registry.kubeconfig"
+
+runuser -l $SUDOUSER -c "sudo oadm registry --config=/etc/origin/master/admin.kubeconfig --service-account=registry --images='registry.access.redhat.com/openshift3/ose-${component}:${version}'"
 
 # Deploying Router
 
@@ -97,4 +95,8 @@ echo "Re-enabling requiretty"
 
 sed -i -e "s/# Defaults    requiretty/Defaults    requiretty/" /etc/sudoers
 
+# Adding user to OpenShift authentication file
+
+
+mkdir -p /etc/origin/master
 htpasswd -cb /etc/origin/master/htpasswd $SUDOUSER $PASSWORD
