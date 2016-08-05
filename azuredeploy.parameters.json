@@ -44,13 +44,17 @@
 		"sshPublicKey": {
 			"value": "GEN-SSH-PUB-KEY"
 		},
-		"sshPrivateKey": {
-			"reference": {
-				"keyvault": {
-					"id": "/subscriptions/changeme/resourceGroups/changeme/providers/Microsoft.KeyVault/vaults/changeme"
-				},
-				"secretName": "changeme"
-			}
+		"subscriptionId": {
+			"value": "changeme"
+		},
+		"keyVaultResourceGroup": {
+			"value": "changeme"
+		},
+		"keyVaultName": {
+			"value": "changeme"
+		},
+		"keyVaultSecret": {
+			"value": "changeme"
 		}
 	}
 }

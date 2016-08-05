@@ -119,11 +119,32 @@
 				"description": "SSH public key on all VMs"
 			}
 		},
-		"sshPrivateKey": {
+		"subscriptionId": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Azure Subscription ID"
+			}
+		},
+		"keyVaultResourceGroup": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Resource Group that contains the Key Vault"
+			}
+		},
+		"keyVaultName": {
+			"type": "string",
+			"minLength": 1,
+			"metadata": {
+				"description": "Name of the Key Vault"
+			}
+		},
+		"keyVaultSecret": {
 			"type": "securestring",
 			"minLength": 1,
 			"metadata": {
-				"description": "SSH private key for deploying OpenShift"
+				"description": "Key Vault Secret Name that contains the Private Key"
 			}
 		},
 		"defaultSubDomain": {
@@ -136,6 +157,10 @@
 	},
 	"variables": {
 		"location": "[resourceGroup().location]",
+		"apiVersionCompute": "2015-06-15",
+		"apiVersionNetwork": "2015-06-15",
+		"apiVersionStorage": "2015-06-15",
+		"apiVersionLinkTemplate": "2015-01-01",
 		"storageAccountType": "Standard_LRS",
 		"namingInfix": "[toLower(parameters('nodePrefix'))]",
 		"newStorageAccountMaster": "[concat(uniqueString(concat(resourceGroup().id, 'msa', '0')), 'msa')]",
@@ -159,6 +184,14 @@
 			"offer": "RHEL",
 			"sku": "7.2",
 			"version": "latest"
+		},
+		"sshPrivateKey": {
+			"reference": {
+				"keyvault": {
+					"id": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', variables('keyVaultResourceGroup'), '/providers/Microsoft.KeyVault/vaults/', variables('keyVaultName'))]"
+				},
+				"secretName": "[variables('keyVaultSecret')]"
+			}
 		},
 		"imageReference": "[variables('osType')]",
 		"sshKeyPath": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
@@ -335,7 +368,7 @@
 			"type": "Microsoft.Network/virtualNetworks",
 			"name": "[variables('virtualNetworkName')]",
 			"location": "[variables('location')]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionNetwork')]",
 			"tags": {
 				"displayName": "VirtualNetwork"
 			},
@@ -361,7 +394,7 @@
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('newStorageAccountMaster')]",
 			"location": "[variables('location')]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionStorage')]",
 			"tags": {
 				"displayName": "StorageAccounts"
 			},
@@ -372,7 +405,7 @@
 			"type": "Microsoft.Storage/storageAccounts",
 			"name": "[variables('newStorageAccountNode')]",
 			"location": "[variables('location')]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionStorage')]",
 			"tags": {
 				"displayName": "StorageAccounts"
 			},
@@ -383,7 +416,7 @@
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[parameters('nodeLbPublicIpDnsLabelPrefix')]",
 			"location": "[variables('location')]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionNetwork')]",
 			"tags": {
 				"displayName": "OpenShiftNodeLBPublicIP"
 			},
@@ -396,14 +429,14 @@
 		}, {
 			"type": "Microsoft.Compute/availabilitySets",
 			"name": "nodes",
-			"apiVersion": "2015-06-15",
 			"location": "[resourceGroup().location]",
+			"apiVersion": "[variables('apiVersionCompute')]",
 			"properties": {}
 		}, {
 			"type": "Microsoft.Network/loadBalancers",
 			"name": "[variables('nodeLoadBalancerName')]",
 			"location": "[variables('location')]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionNetwork')]",
 			"tags": {
 				"displayName": "OpenShiftNodeLB"
 			},
@@ -474,10 +507,10 @@
 				}]
 			}
 		}, {
-			"apiVersion": "2015-06-15",
 			"type": "Microsoft.Network/loadBalancers/inboundNatRules",
 			"name": "[concat(variables('nodeLoadBalancerName'), '/', 'SSH-', variables('namingInfix'), '-', copyIndex())]",
 			"location": "[variables('location')]",
+			"apiVersion": "[variables('apiVersionNetwork')]",
 			"tags": {
 				"displayName": "inboundNatRules"
 			},
@@ -503,7 +536,7 @@
 			"type": "Microsoft.Network/publicIPAddresses",
 			"name": "[parameters('openshiftMasterPublicIpDnsLabelPrefix')]",
 			"location": "[resourceGroup().location]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionNetwork')]",
 			"tags": {
 				"displayName": "OpenShiftMasterPublicIP"
 			},
@@ -517,7 +550,7 @@
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(parameters('openshiftMasterHostname'), 'nic')]",
 			"location": "[resourceGroup().location]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionNetwork')]",
 			"tags": {
 				"displayName": "OpenShiftMasterNetworkInterface"
 			},
@@ -542,7 +575,7 @@
 			"type": "Microsoft.Compute/virtualMachines",
 			"name": "[parameters('openshiftMasterHostname')]",
 			"location": "[resourceGroup().location]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionCompute')]",
 			"tags": {
 				"displayName": "OpenShiftMasterVirtualMachine"
 			},
@@ -597,7 +630,7 @@
 			"type": "Microsoft.Compute/virtualMachines/extensions",
 			"name": "[concat(parameters('openshiftMasterHostname'), '/deployOpenShift')]",
 			"location": "[resourceGroup().location]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionCompute')]",
 			"tags": {
 				"displayName": "PrepMaster"
 			},
@@ -622,7 +655,7 @@
 			"type": "Microsoft.Network/networkInterfaces",
 			"name": "[concat(variables('namingInfix'), copyIndex(), 'nic')]",
 			"location": "[resourceGroup().location]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionNetwork')]",
 			"tags": {
 				"displayName": "OpenShiftNodeNetworkInterfaces"
 			},
@@ -655,7 +688,7 @@
 			"type": "Microsoft.Compute/virtualMachines",
 			"name": "[concat(variables('namingInfix'), '-', copyIndex())]",
 			"location": "[resourceGroup().location]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionCompute')]",
 			"tags": {
 				"displayName": "OpenShiftNodes"
 			},
@@ -717,7 +750,7 @@
 			"type": "Microsoft.Compute/virtualMachines/extensions",
 			"name": "[concat(variables('namingInfix'), '-', copyIndex(), '/prepNodes')]",
 			"location": "[resourceGroup().location]",
-			"apiVersion": "2015-06-15",
+			"apiVersion": "[variables('apiVersionCompute')]",
 			"tags": {
 				"displayName": "PrepNodes"
 			},
@@ -745,7 +778,7 @@
 		}, {
 			"name": "OpenShiftDeployment",
 			"type": "Microsoft.Resources/deployments",
-			"apiVersion": "2015-01-01",
+			"apiVersion": "[variables('apiVersionLinkTemplate')]",
 			"dependsOn": [
 				"[concat('Microsoft.Compute/virtualMachines/', parameters('openshiftMasterHostname'), '/extensions/deployOpenShift')]",
 				"nodeScriptLoop"
@@ -782,7 +815,7 @@
 						"value": "[parameters('defaultSubDomain')]"
 					},
 					"sshPrivateKey": {
-						"value": "[parameters('sshPrivateKey')]"
+						"value": "[variables('sshPrivateKey')]"
 					}
 				}
 			}
